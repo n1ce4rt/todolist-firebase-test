@@ -1,5 +1,6 @@
 {
   "name": "todo-app-woman",
+  "homepage": "https://n1ce4rt.github.io/todolist-firebase-test/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -31,7 +32,11 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
+    "lint": "eslint -c .eslintrc --ext .ts,.tsx .",
+    "lint:fix": "npm run lint -- --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +57,7 @@
     ]
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.4"
+    "@types/uuid": "^8.3.4",
+    "gh-pages": "^4.0.0"
   }
 }

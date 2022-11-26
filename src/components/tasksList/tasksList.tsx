@@ -3,18 +3,20 @@ import Box from '@mui/material/Box';
 import { Task } from '../task/task';
 import { useAppSelector } from '../../hooks/hooks';
 
-
 export const TasksList = React.memo(() => {
-  let tasks = useAppSelector(state => state.tasksSlice.tasks)
-  const filter = useAppSelector(state => state.filterSlice.filter)
-  console.log(tasks)
+
+  let tasks = useAppSelector(state => state.tasksSlice.tasks);
+
+  const filter = useAppSelector(state => state.filterSlice.filter);
+
   if (filter === 'Done') {
     tasks = tasks.filter((task) => task.status);
-    console.log('Done')
   } 
+
   if (filter === 'Progress') {
     tasks = tasks.filter((task) => !task.status);
   }
+  
   return (
     <Box>
       {
@@ -24,9 +26,9 @@ export const TasksList = React.memo(() => {
               key={task.id}
               task={task}
             />
-          )
+          );
         })
       }
     </Box>
-  )
-})
+  );
+});

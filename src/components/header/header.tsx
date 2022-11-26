@@ -4,7 +4,6 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Button from '@mui/material/Button';
 
-
 export const Header = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -15,4 +14,4 @@ export const Header = () => {
       </AppBar>
     </Box>
   );
-}
+};

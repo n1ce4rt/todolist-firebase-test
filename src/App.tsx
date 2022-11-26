@@ -9,18 +9,19 @@ import { Main } from './components/main/main';
 import { useAppDispatch } from './hooks/hooks';
 import { fetchTasks } from './reducers/tasksSlice';
 
-export const App = React.memo(() => {
-  const dispatch = useAppDispatch()
+export const App = () => {
+  const dispatch = useAppDispatch();
+  
   useEffect(() => {
-    dispatch(fetchTasks())
-  })
+    dispatch(fetchTasks());
+  },[]);
   
   return (
     <>
-    <Header />
-    <Main />
+      <Header />
+      <Main />
     </>
   );
-})
+};
 
 export default App;

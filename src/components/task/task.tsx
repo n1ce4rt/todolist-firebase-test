@@ -10,51 +10,45 @@ import CreateIcon from '@mui/icons-material/Create';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckIcon from '@mui/icons-material/Check';
 import DownloadIcon from '@mui/icons-material/Download';
+import { Link, TextField } from '@mui/material';
+import { ref , uploadBytes } from 'firebase/storage';
 import { DatePicker } from '../dataPiker/dataPiker';
-import { fetchRemoveTask, fetchUpdateTaskStatus, fetchUpdateTaskTitle, setTaskFileUrl, TaskType } from '../../reducers/tasksSlice';
+import { fetchRemoveTask, fetchTaskFileUrl, fetchUpdateTaskStatus, fetchUpdateTaskTitle, TaskType } from '../../reducers/tasksSlice';
 import { useAppDispatch } from '../../hooks/hooks';
-import { TextField } from '@mui/material';
 import { storage } from '../../firebase-config';
-import { ref , uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
+
 type PropsType = {
   task: TaskType
 };
-export const Task: FC<PropsType> = React.memo(({task}) => {
+
+export const Task: FC<PropsType> = ({task}) => {
+  const {date, id, title, status, deadline, fileUrl} = task;
 
   useEffect(() => {
-    const fetchTaskFileUrl = () => {
-      const fileRef = ref(storage, `files`);
-      listAll(fileRef).then((res) => {
-        res.items.forEach((item) => {
-          const fileId = item.fullPath.slice(6)
-          getDownloadURL(item).then((url) => {
-            if (fileId === id) {
-              dispatch(setTaskFileUrl({id, url}))
-            }
-          })
-        })
-      })
-    }
-    fetchTaskFileUrl()
-  },[])
+    dispatch(fetchTaskFileUrl(id));
+  },[]);
 
   const dispatch = useAppDispatch();
-  const {date, id, title, status, deadline, fileUrl} = task;
+
   const [isEditable, setIsEditable] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState(title);
 
   const handleRemoveTask = () => {
     dispatch(fetchRemoveTask(id));
   };
+
   const handleChangeStatus = () => {
     dispatch(fetchUpdateTaskStatus({id, status}));
   };
+
   const toggleEditable = () => {
     setIsEditable(!isEditable);
   };
+
   const handleChangeNewTitle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setNewTaskTitle(e.currentTarget.value);
   };
+
   const updateTaskTitle = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       if (newTaskTitle !== '' && newTaskTitle !== title) {
@@ -63,31 +57,31 @@ export const Task: FC<PropsType> = React.memo(({task}) => {
       }
     };
   };
-  const uploadTaskFile = (e: any) => {
+  
+  const uploadTaskFile = async (e: any) => {
     if (e.target.files[0] === null) {
       return;
     }
     const fileRef = ref(storage, `files/${id}`);
-    console.log(fileRef)
-    uploadBytes(fileRef, e.target.files[0])
+    await uploadBytes(fileRef, e.target.files[0]);
     const formData = new FormData();
     formData.append('file', e.target.files[0]);
-    
+    dispatch(fetchTaskFileUrl(id));
   };
 
   return (
-    <Card sx={{ minWidth: 275, margin: '15px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', bgcolor: '#ffffff' }}>
-      <CardContent>
+    <Card sx={{ minWidth: 275, margin: '15px 0', display: 'flex', alignItems: 'center', flexDirection: 'column', bgcolor: task.status ? '#8AE9B3' : '#F1F2F6' }}>
+      <CardContent sx={{width: '100%'}}>
         {
           isEditable ? 
-          <TextField value={newTaskTitle} onChange={handleChangeNewTitle} onKeyPress={updateTaskTitle}/>
-          :
-          <Typography variant="h5" component="div" 
-          sx={{
-            textDecoration: status? 'line-through' : ''
-          }}>
-          {title}
-        </Typography>
+            <TextField fullWidth value={newTaskTitle} onChange={handleChangeNewTitle} onKeyPress={updateTaskTitle} onBlur={() => setIsEditable(!isEditable)}/>
+            :
+            <Typography variant="h5" component="div" align="center"
+              sx={{
+                textDecoration: status? 'line-through' : '',
+              }}>
+              {title}
+            </Typography>
         }
       </CardContent>
       <CardActions>
@@ -103,18 +97,18 @@ export const Task: FC<PropsType> = React.memo(({task}) => {
             <input hidden accept="image/*" multiple type="file" onChange={uploadTaskFile}/>
             <CloudUploadIcon />
           </IconButton>
-          <a href={fileUrl} target={'_blank'}>
-            <IconButton aria-label="download" component="label">
+          <Link href={fileUrl} underline="none" target={'_blank'} sx={{display: fileUrl === '' ? 'none' : 'block'}}>
+            <IconButton aria-label="download" component="label">               
               <DownloadIcon />
             </IconButton>
-          </a>
+          </Link>
           <IconButton aria-label="delete" onClick={handleRemoveTask}>
             <DeleteIcon/>
           </IconButton>
         </Stack>
 
-        <DatePicker id={id} deadline={deadline}/>
+        <DatePicker id={id} deadline={deadline} date={date}/>
       </CardActions>
     </Card>
-  )
-})
+  );
+};
